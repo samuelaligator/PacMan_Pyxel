@@ -49,9 +49,11 @@ def draw_dots():
     for column_number in range(2, grid.shape[1]):  # 2, = two-column offset (see grid)
         for line_number in range(grid.shape[0]):
             if grid[line_number, column_number] == 2:
-                pyxel.rect(column_number * 8 + 3 - 16, line_number * 8 + 3, 2, 2, 2)  # -16 = two-column offset (see grid)
+                pyxel.rect(column_number * 8 + 3 - 16, line_number * 8 + 3, 2, 2,
+                           2)  # -16 = two-column offset (see grid)
             elif grid[line_number, column_number] == 3:
-                pyxel.blt(column_number * 8 - 16, line_number * 8, 0, 224, 0, 8, 8, 0)  # -16 = two-column offset (see grid)
+                pyxel.blt(column_number * 8 - 16, line_number * 8, 0, 224, 0, 8, 8,
+                          0)  # -16 = two-column offset (see grid)
             # to see the wall hitbox :
             # elif grid[line_number, column_number] == 1:
             #    pyxel.rect(column_number * 8 - 16, line_number * 8, 8, 8, 4)
@@ -99,10 +101,12 @@ class Pacman:
         self.pacman_movement()
 
     def pacman_direction(self):
-        direction = {0: pyxel.KEY_DOWN, 1: pyxel.KEY_UP, 2: pyxel.KEY_LEFT, 3: pyxel.KEY_RIGHT}
-        for i in range(4):
-            if pyxel.btn(direction[i]):
+        direction_keys = {0: (pyxel.KEY_DOWN, pyxel.KEY_S), 1: (pyxel.KEY_UP, pyxel.KEY_Z),
+                          2: (pyxel.KEY_LEFT, pyxel.KEY_Q), 3: (pyxel.KEY_RIGHT, pyxel.KEY_D)}
+        for i, (key1, key2) in direction_keys.items():
+            if pyxel.btn(key1) or pyxel.btn(key2):
                 self.input_direction = i
+                break  # Exit the loop after finding the first pressed key
 
     def pacman_mouth(self):
         converter = {0: 0, 1: 0, 2: 1, 3: 1, 4: 2, 5: 2, 6: 1, 7: 1}
@@ -141,7 +145,7 @@ class Pacman:
 
 class App:
     def __init__(self):
-        pyxel.init(224, 248, "Pac-Man", 60, pyxel.KEY_ESCAPE, 10)
+        pyxel.init(224, 248, "Pac-Man", 65, pyxel.KEY_ESCAPE, 10)
         pyxel.load("theme.pyxres")
         self.pacman = Pacman()
         pyxel.run(self.update, self.draw)

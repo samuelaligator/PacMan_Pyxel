@@ -71,6 +71,11 @@ class Pacman:
         self.walking = True
         self.mouth = 2
         self.i_mouth = 0
+        self.mouse_x = 0
+        self.mouse_y = 0
+        self.mouse_position_saved = False
+        self.swiped = False
+        self.swipe_sensitivity = 15
 
     def draw_pacman(self):
 
@@ -88,7 +93,7 @@ class Pacman:
 
     def main(self):
 
-        self.pacman_direction()
+        self.direction_detection()
         self.pacman_mouth()
 
         if self.x % 8 == 0 and self.y % 8 == 0:
@@ -100,13 +105,30 @@ class Pacman:
         self.teleportation()
         self.pacman_movement()
 
-    def pacman_direction(self):
-        direction_keys = {0: (pyxel.KEY_DOWN, pyxel.KEY_S), 1: (pyxel.KEY_UP, pyxel.KEY_Z),
-                          2: (pyxel.KEY_LEFT, pyxel.KEY_Q), 3: (pyxel.KEY_RIGHT, pyxel.KEY_D)}
-        for i, (key1, key2) in direction_keys.items():
-            if pyxel.btn(key1) or pyxel.btn(key2):
+    def direction_detection(self):
+        direction_keys = {0: (pyxel.KEY_DOWN, pyxel.KEY_S, pyxel.GAMEPAD1_BUTTON_DPAD_DOWN),
+                          1: (pyxel.KEY_UP, pyxel.KEY_Z, pyxel.GAMEPAD1_BUTTON_DPAD_UP),
+                          2: (pyxel.KEY_LEFT, pyxel.KEY_Q, pyxel.GAMEPAD1_BUTTON_DPAD_LEFT),
+                          3: (pyxel.KEY_RIGHT, pyxel.KEY_D, pyxel.GAMEPAD1_BUTTON_DPAD_RIGHT)}
+        for i, (key1, key2, key3) in direction_keys.items():
+            if pyxel.btn(key1) or pyxel.btn(key2) or pyxel.btn(key3):
                 self.input_direction = i
                 break  # Exit the loop after finding the first pressed key
+
+        # swipe system for touch screens
+        if pyxel.btn(pyxel.MOUSE_BUTTON_LEFT):
+            if self.mouse_position_saved and not self.swiped:
+                if abs(self.mouse_x - pyxel.mouse_x) >= self.swipe_sensitivity:
+                    self.input_direction = 2 if self.mouse_x - pyxel.mouse_x > 0 else 3
+                    self.swiped = True
+                elif abs(self.mouse_y - pyxel.mouse_y) >= self.swipe_sensitivity:
+                    self.input_direction = 1 if self.mouse_y - pyxel.mouse_y > 0 else 0
+                    self.swiped = True
+            elif not self.mouse_position_saved:
+                self.mouse_x, self.mouse_y = pyxel.mouse_x, pyxel.mouse_y
+                self.mouse_position_saved = True
+        else:
+            self.mouse_position_saved, self.swiped = False, False
 
     def pacman_mouth(self):
         converter = {0: 0, 1: 0, 2: 1, 3: 1, 4: 2, 5: 2, 6: 1, 7: 1}
